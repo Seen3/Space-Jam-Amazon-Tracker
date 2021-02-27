@@ -22,6 +22,4 @@ Contributors:
         > Sending email if price is less than threshold
         > UI for adding and removing urls
 
-
-    Md Taseen Atehar
-        > Nothing
+        > Basically everything
