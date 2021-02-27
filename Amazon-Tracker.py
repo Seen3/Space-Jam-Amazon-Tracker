@@ -21,11 +21,18 @@ class AmazonTracker:
     # and asks for user details and product urls
     def __init__(self):
         params = db.access_product_params()
+        self.name, self.to_addr, self.check_freq = db.access_user_data()
+        self.check_freq = float(self.check_freq)
         for param in params:
             self.url = param[0]
             self.maxPrice = int(param[1])
             self.connect()
             self.extract_data()
+
+            print('All products have been checked\n')
+            print('Enter ctrl + c to exit code')
+
+            sleep(self.check_freq * 60)  # Stops the code process for 20 seconds
 
     # connects to the webpage provided using the url
     def connect(self):
@@ -67,7 +74,7 @@ class AmazonTracker:
         # Mrp = int(soup.find(class_='priceBlockStrikePriceString a-text-strike').get_text().strip()[2:-3].replace(',', ''))
 
         deal_price = None
-        selling_price = None
+        price = None
 
         # Exception handling is used to prevent the code from crashing if the required data is missing
         try:
@@ -82,13 +89,6 @@ class AmazonTracker:
         except:
             pass
 
-        # Clear the screen
-        # clear()
-
-        # ReviewScore = float(soup.select('.a-star-4-5')[0].get_text().split()[0].replace(',', '.'))
-
-        # print(Price.prettify())
-
         print('Product Title: ', product_title)
         print('Availability: ', availability)
         # print('MRP =', Mrp)
@@ -100,19 +100,12 @@ class AmazonTracker:
         if price:
             print('Price = ', price)
 
-        name, to_addr, checkFreq = db.access_user_data()
-
         print(self.maxPrice)
         if price <= self.maxPrice:
-            send_mail(to_addr, name, product_title, price, self.url)
+            send_mail(self.to_addr, self.name, product_title, price, self.url)
 
 
 # after the code runs once a break of 20 seconds is given before running again
 while KeyboardInterrupt:
     db = Database()
     AmazonTracker()
-
-    print('All products have been checked\n')
-    print('Enter ctrl + c to exit code')
-
-    sleep(20)  # Stops the code process for 20 seconds

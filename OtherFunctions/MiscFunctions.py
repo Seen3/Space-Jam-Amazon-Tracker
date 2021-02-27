@@ -17,10 +17,8 @@ def get_email():
 
 # Gets the frequency for which the program should run.
 def get_check_freq():
-    unit = input("Enter the check frequency unit sec, min, hour, day\n")
-    check_freq = input("Enter the frequency for which you want the product data to be checked in " + unit + '\n')
-
-    return check_freq  # , unit
+    return input("Enter the frequency for which you want the product data to be checked in minutes"
+                 "(Decimals allowed)\n")
 
 
 # Used to clear the terminal window
