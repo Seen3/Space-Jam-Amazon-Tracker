@@ -22,7 +22,6 @@ def get_check_freq():
 
 
 # Used to clear the terminal window
-# TODO Remove the _ = if clear is used and see if it woks.
 def clear():
     # for windows
     if name == 'nt':

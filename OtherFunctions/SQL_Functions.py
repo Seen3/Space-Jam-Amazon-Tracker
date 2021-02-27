@@ -62,11 +62,6 @@ class Database:
         while True:
             url = input('Copy the url from the product page and paste it below\n')
             max_price = input('Enter the max price of the product\n')
-            # availability_alert_email = input('Enter true for false if you want to get an'
-            #                                  ' email alert when the price of the product falls below the max price\n')
-            # availability_alert_notification = input(
-            #     'Enter true for false if you want to get an notification alert when'
-            #     ' the price of the product falls below the max price\n')
 
             # Insert the received values into the sql database
             self.c.execute('INSERT INTO URL VALUES(?, ?)',
@@ -90,3 +85,6 @@ class Database:
 
     def access_product_params(self):
         return self.c.execute("SELECT * FROM URL").fetchall()
+
+    def remove_product(self):
+        pass
