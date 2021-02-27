@@ -1,3 +1,6 @@
 from notify_run import Notify
 notify=Notify()
-notify.send("Buy now")
+def buyNow():
+  notify.send("Buy now")
+def buy(title,price,link):
+  notify.send("{} at {} on {}".format(title,price,link))
