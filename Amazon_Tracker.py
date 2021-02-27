@@ -19,20 +19,27 @@ from OtherFunctions.Send_Email import send_mail
 class AmazonTracker:
     # Constructor of the class it checks if the database file exists, and if it doesn't it creates one
     # and asks for user details and product urls
-    def __init__(self):
-        params = db.access_product_params()
-        self.name, self.to_addr, self.check_freq = db.access_user_data()
-        self.check_freq = float(self.check_freq)
-        for param in params:
-            self.url = param[0]
-            self.maxPrice = int(param[1])
-            self.connect()
-            self.extract_data()
+    def __init__(self, alert_confirmation, loop=True):
+        while KeyboardInterrupt:
+            params = db.access_product_params()
+            self.name, self.to_addr, self.check_freq = db.access_user_data()
+            self.check_freq = float(self.check_freq)
+            for param in params:
+                self.url = param[0]
+                self.maxPrice = int(param[1])
+                self.connect()
+                self.extract_data()
 
-            print('All products have been checked\n')
-            print('Enter ctrl + c to exit code')
+                if alert_confirmation:
+                    self.send_alert()
 
-            sleep(self.check_freq * 60)  # Stops the code process for 20 seconds
+                if not loop:
+                    exit()
+
+                print('All products have been checked\n')
+                print('Enter ctrl + c to exit code')
+
+                sleep(self.check_freq * 60)  # Stops the code process for 20 seconds
 
     # connects to the webpage provided using the url
     def connect(self):
@@ -63,18 +70,14 @@ class AmazonTracker:
     def extract_data(self):
         soup = BeautifulSoup(self.response.content, 'lxml')
 
-        # with open('product2.txt', 'w', encoding='utf-8') as f:
-        #     f.write(soup.prettify())
+        deal_price = None
+        self.price = None
 
         # Extracting data from the amazon html code
-        product_title = soup.find(id='productTitle').get_text().strip()
+        self.product_title = soup.find(id='productTitle').get_text().strip()
         availability = soup.find(id='availability').get_text().strip()  # In stock.
 
-        price = soup.find(id='price')
-        # Mrp = int(soup.find(class_='priceBlockStrikePriceString a-text-strike').get_text().strip()[2:-3].replace(',', ''))
-
-        deal_price = None
-        price = None
+        self.price = soup.find(id='price')
 
         # Exception handling is used to prevent the code from crashing if the required data is missing
         try:
@@ -84,28 +87,30 @@ class AmazonTracker:
             pass
 
         try:
-            price = int(soup.find(id='priceblock_ourprice').get_text().strip()[2:-3].replace(',', ''))
+            self.price = int(soup.find(id='priceblock_ourprice').get_text().strip()[2:-3].replace(',', ''))
 
         except:
             pass
 
-        print('Product Title: ', product_title)
+        print('Product Title: ', self.product_title)
         print('Availability: ', availability)
-        # print('MRP =', Mrp)
 
         # Print the data if it is found in the code
         if deal_price:
             print('Deal Price =', deal_price)
 
-        if price:
-            print('Price = ', price)
+        if self.price:
+            print('Price = ', self.price)
 
-        print(self.maxPrice)
-        if price <= self.maxPrice:
-            send_mail(self.to_addr, self.name, product_title, price, self.url)
+        print('Max price set by user = ', self.maxPrice)
+
+    # Send alert to the user if price falls below the max price set by the user.
+    def send_alert(self):
+        if self.price <= self.maxPrice:
+            send_mail(self.to_addr, self.name, self.product_title, self.price, self.url)
 
 
-# after the code runs once a break of 20 seconds is given before running again
-while KeyboardInterrupt:
-    db = Database()
-    AmazonTracker()
+db = Database()
+if __name__ == '__main__':
+    # The one is telling the constructor to enable user alerts.
+    AmazonTracker(alert_confirmation=True)
