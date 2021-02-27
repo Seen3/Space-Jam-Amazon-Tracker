@@ -2,17 +2,25 @@ from OtherFunctions.SQL_Functions import Database
 
 from Amazon_Tracker import AmazonTracker
 
-# This tells the constructor to disable alerts
-AT = AmazonTracker(alert_confirmation=False, loop=False)
+from OtherFunctions.MiscFunctions import clear
 
-option = input('1: List all the products\n'
-               '2: Add products\n'
-               '3: Remove products\n')
+while KeyboardInterrupt:
+    # This tells the constructor to disable alerts
+    AT = AmazonTracker(alert_confirmation=False, loop=False)
 
-if option == '1':
-    AT.extract_data()
-elif option == '2':
+    option = input('1: Add products\n'
+                   '2: Remove products\n'
+                   '3: Exit\n')
+
     db = Database()
-    db.get_product_params()
-elif option == '3':
-    print('This feature is in development')
+    if option == '1':
+        db.get_product_params()
+    elif option == '2':
+        print("Enter the sl number of the product you want deleted")
+
+        product_id = int(input())
+        db.remove_product(product_id)
+    elif option == '3':
+        exit()
+
+    clear()

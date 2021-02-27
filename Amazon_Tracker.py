@@ -19,31 +19,38 @@ from OtherFunctions.Send_Email import send_mail
 class AmazonTracker:
     # Constructor of the class it checks if the database file exists, and if it doesn't it creates one
     # and asks for user details and product urls
-    def __init__(self, alert_confirmation, loop=True):
+    def __init__(self, alert_confirmation, loop=True, debug=False):
+        print('Accessing product data. If you are tracking many products this may take a while.')
         while KeyboardInterrupt:
+            self.debug = debug
+
             params = db.access_product_params()
             self.name, self.to_addr, self.check_freq = db.access_user_data()
             self.check_freq = float(self.check_freq)
             for param in params:
-                self.url = param[0]
-                self.maxPrice = int(param[1])
+                self.product_id = param[0]
+                self.url = param[1]
+                self.maxPrice = int(param[2])
+
                 self.connect()
                 self.extract_data()
 
                 if alert_confirmation:
                     self.send_alert()
 
-                if not loop:
-                    exit()
+            print('\n\nAll products have been checked\n')
 
-                print('All products have been checked\n')
-                print('Enter ctrl + c to exit code')
+            if not loop:
+                break
 
-                sleep(self.check_freq * 60)  # Stops the code process for 20 seconds
+            print('Enter ctrl + c to exit code')
+
+            sleep(self.check_freq * 60)  # Stops the code process for 20 seconds
 
     # connects to the webpage provided using the url
     def connect(self):
-        print("\n\nPlease wait. We are attempting to connect to the product page")
+        if self.debug:
+            print("\n\nPlease wait. We are attempting to connect to the product page")
 
         # The headers are used to make the code imitate a browser and prevent amazon from block it access to the site.
         headers = {
@@ -61,7 +68,8 @@ class AmazonTracker:
 
         # code proceeds only if the connection to the product page is successful
         if self.response:
-            print("Connected successfully\nProcessing data. Please wait\n\n")
+            if self.debug:
+                print("Connected successfully\n\n")
         else:
             print("Connection failed")
             exit()
@@ -92,17 +100,18 @@ class AmazonTracker:
         except:
             pass
 
-        print('Product Title: ', self.product_title)
-        print('Availability: ', availability)
+        print("\nProduct ID: ", self.product_id)
+        print('\tProduct Title: ', self.product_title)
+        print('\tAvailability: ', availability)
 
         # Print the data if it is found in the code
         if deal_price:
-            print('Deal Price =', deal_price)
+            print('\tDeal Price =', deal_price)
 
         if self.price:
-            print('Price = ', self.price)
+            print('\tPrice = ', self.price)
 
-        print('Max price set by user = ', self.maxPrice)
+        print('\tMax price set by user = ', self.maxPrice)
 
     # Send alert to the user if price falls below the max price set by the user.
     def send_alert(self):
