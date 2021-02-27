@@ -14,6 +14,8 @@ class Database:
         if not self.file_exists():
             self.connect()
             self.create_tables()
+            self.get_user_data()
+            self.get_product_params()
 
         else:
             self.connect()
@@ -45,3 +47,47 @@ class Database:
     def create_tables(self):
         self.c.execute('CREATE TABLE URL(url, maxPrice, availabilityAlertEmail, availabilityAlertNotification)')
         self.c.execute('CREATE TABLE USER(username, email, checkFrequency)')
+
+    # Gets the user data from user
+    def get_user_data(self):
+        username = input('Enter your name')
+        email = get_email()
+        check_freq = get_check_freq()
+
+        self.c.execute('INSERT INTO USER VALUES(?, ?, ?)', (username, email, check_freq))
+
+        self.con.commit()
+
+    def get_product_params(self):
+        while True:
+            url = input('Copy the url from the product page and paste it below\n')
+            max_price = input('Enter the max price of the product\n')
+            availability_alert_email = input('Enter true for false if you want to get an'
+                                             ' email alert when the price of the product falls below the max price\n')
+            availability_alert_notification = input(
+                'Enter true for false if you want to get an notification alert when'
+                ' the price of the product falls below the max price\n')
+
+            # Insert the received values into the sql database
+            self.c.execute('INSERT INTO URL VALUES(?, ?, ?, ?)',
+                           (url, max_price, availability_alert_email, availability_alert_notification))
+
+            # commits the changes made to the database
+            self.con.commit()
+
+            print('\n\nDo you want to enter another product link? y/n\n')
+
+            # If the user doesn't enter y then the url access function is terminated.
+            if input() != 'y':
+                break
+
+    '''
+        From here the functions will access the database to return values
+    '''
+
+    def access_user_data(self):
+        return self.c.execute("SELECT * FROM USER").fetchone()
+
+    def access_product_params(self):
+        # params = self.c.execute("SELECT * FROM URL").fetchall()
+        return self.c.execute("SELECT * FROM URL").fetchall()
