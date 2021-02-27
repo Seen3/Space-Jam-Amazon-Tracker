@@ -52,6 +52,60 @@ class AmazonTracker:
             print("Connection failed")
             exit()
 
+    # After the web page data is obtained the required data such as the product price is extracted.
+    def extract_data(self):
+        soup = BeautifulSoup(self.response.content, 'lxml')
+
+        # with open('product2.txt', 'w', encoding='utf-8') as f:
+        #     f.write(soup.prettify())
+
+        # Extracting data from the amazon html code
+        product_title = soup.find(id='productTitle').get_text().strip()
+        availability = soup.find(id='availability').get_text().strip()  # In stock.
+
+        price = soup.find(id='price')
+        # Mrp = int(soup.find(class_='priceBlockStrikePriceString a-text-strike').get_text().strip()[2:-3].replace(',', ''))
+
+        deal_price = None
+        selling_price = None
+
+        # Exception handling is used to prevent the code from crashing if the required data is missing
+        try:
+            deal_price = int(soup.find(id='priceblock_dealprice').get_text().strip()[2:-3].replace(',', ''))
+
+        except:
+            pass
+
+        try:
+            price = int(soup.find(id='priceblock_ourprice').get_text().strip()[2:-3].replace(',', ''))
+
+        except:
+            pass
+
+        # Clear the screen
+        # clear()
+
+        # ReviewScore = float(soup.select('.a-star-4-5')[0].get_text().split()[0].replace(',', '.'))
+
+        # print(Price.prettify())
+
+        print('Product Title: ', product_title)
+        print('Availability: ', availability)
+        # print('MRP =', Mrp)
+
+        # Print the data if it is found in the code
+        if deal_price:
+            print('Deal Price =', deal_price)
+
+        if price:
+            print('Price = ', price)
+
+        name, to_addr, checkFreq = db.access_user_data()
+
+        print(self.maxPrice)
+        if price <= self.maxPrice:
+            send_mail(to_addr, name, product_title, price, self.url)
+
 
 # after the code runs once a break of 20 seconds is given before running again
 while KeyboardInterrupt:
