@@ -50,7 +50,7 @@ class Database:
 
     # Gets the user data from user
     def get_user_data(self):
-        username = input('Enter your name')
+        username = input('Enter your name: ')
         email = get_email()
         check_freq = get_check_freq()
 
